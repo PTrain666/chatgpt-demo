@@ -2,17 +2,24 @@ import type { APIRoute } from 'astro'
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
 const apiKey = import.meta.env.OPENAI_API_KEY
+const zzyKey = import.meta.env.ZZY_API_KEY
 
 export const post: APIRoute = async (context) => {
   const body = await context.request.json()
   const messages = body.messages
+  const zkey = body.key
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
 
   if (!messages) {
     return new Response('No input text')
   }
+  console.log(JSON.stringify(messages))
 
+  if (zkey !== zzyKey) {
+    let resp = new Response("嘻嘻，找我要个密码吧~~");
+    return resp;
+  }
   const completion = await fetch('https://api.openai.com/v1/chat/completions', {
     headers: {
       'Content-Type': 'application/json',
@@ -63,5 +70,5 @@ export const post: APIRoute = async (context) => {
     },
   })
 
-  return new Response(stream)
+  return new Response("OK")
 }

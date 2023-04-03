@@ -4,48 +4,46 @@ import IconClear from './icons/Clear'
 import type { ChatMessage } from '../types'
 
 const reg = /\[(.*?)\]/gm
-const zzyKey = import.meta.env.ZZY_API_KEY
 
 export default () => {
   let inputRef: HTMLInputElement
   const [messageList, setMessageList] = createSignal<ChatMessage[]>([])
   const [currentAssistantMessage, setCurrentAssistantMessage] = createSignal('')
   const [loading, setLoading] = createSignal(false)
-  const [key, setKey] = createSignal(true)
-
   const handleButtonClick = async () => {
     let inputValue = inputRef.value
     if (!inputValue) {
       return
     }
-    let key = inputValue.match(reg)
-    if(key == null) {
-      setKey(false)
-      return;
-    }
-    if (key[0] !== zzyKey) {
-      setKey(false)
-      return;
-    } else {
-      inputValue = inputValue.replace(zzyKey, "");
-      setKey(true)
+    let zKey = inputValue.match(reg)
+    let zzy = ""
+    if(zKey != null) {
+      zzy = zKey[0];
+      inputValue = inputValue.replace(zzy, "");
     }
     setLoading(true)
     // @ts-ignore
     if (window?.umami) umami.trackEvent('chat_generate')
     inputRef.value = ''
+    let data_list: Array<ChatMessage> = messageList()
     setMessageList([
-      ...messageList(),
+      ...data_list,
       {
         role: 'user',
         content: inputValue,
       },
     ])
-
+    let filter_list : Array<ChatMessage>= []
+    for(let msg in data_list) {
+      if(msg.role != 'error') {
+        filter_list.push(msg);
+      }
+    }
     const response = await fetch('/api/generate', {
       method: 'POST',
       body: JSON.stringify({
-        messages: messageList(),
+        messages: filter_list,
+        key: zzy
       }),
     })
     if (!response.ok) {
@@ -72,13 +70,23 @@ export default () => {
       }
       done = readerDone
     }
-    setMessageList([
-      ...messageList(),
-      {
-        role: 'assistant',
-        content: currentAssistantMessage(),
-      },
-    ])
+    if(currentAssistantMessage() == "嘻嘻，找我要个密码吧~~") {
+      setMessageList([
+        ...messageList(),
+        {
+          role: 'error',
+          content: "嘻嘻，找我要个密码吧~~",
+        },
+      ])
+    } else {
+      setMessageList([
+        ...messageList(),
+        {
+          role: 'assistant',
+          content: currentAssistantMessage(),
+        },
+      ])
+    }
     setCurrentAssistantMessage('')
     setLoading(false)
   }
@@ -126,9 +134,6 @@ export default () => {
             <IconClear />
           </button>
         </div>
-      </Show>
-      <Show when={!key()}>
-        <p style={{"color":"red"}}>找我要个码···</p>
       </Show>
     </div>
   )

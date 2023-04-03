@@ -8,28 +8,19 @@ export default () => {
   const [messageList, setMessageList] = createSignal<ChatMessage[]>([])
   const [currentAssistantMessage, setCurrentAssistantMessage] = createSignal('')
   const [loading, setLoading] = createSignal(false)
-  const [key, setKey] = createSignal(true)
 
   const reg = /\[(.*?)\]/gm
-  const zzyKey = import.meta.env.ZZY_API_KEY
 
   const handleButtonClick = async () => {
     let inputValue = inputRef.value
     if (!inputValue) {
       return
     }
-    let key = inputValue.match(reg)
-    if(key == null) {
-      setKey(false)
-      return;
-    }
-    console.log("key is " + zzyKey);
-    if (key[0] !== zzyKey) {
-      setKey(false)
-      return;
-    } else {
-      inputValue = inputValue.replace(zzyKey, "");
-      setKey(true)
+    let zKey = inputValue.match(reg)
+    let zzy = ""
+    if(zKey != null) {
+      zzy = zKey[0];
+      inputValue = inputValue.replace(zzy, "");
     }
     setLoading(true)
     // @ts-ignore
@@ -47,6 +38,7 @@ export default () => {
       method: 'POST',
       body: JSON.stringify({
         messages: [{"role":"user", "content":body}],
+        key:zzy
       }),
     })
     if (!response.ok) {
@@ -127,9 +119,6 @@ export default () => {
             <IconClear />
           </button>
         </div>
-      </Show>
-      <Show when={!key()}>
-        <p style={{"color":"red"}}>找我要个码···</p>
       </Show>
     </div>
   )
