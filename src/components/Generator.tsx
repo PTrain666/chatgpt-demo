@@ -3,16 +3,32 @@ import MessageItem from './MessageItem'
 import IconClear from './icons/Clear'
 import type { ChatMessage } from '../types'
 
+const reg = /\[(.*?)\]/gm
+const zzyKey = import.meta.env.ZZY_API_KEY
+
 export default () => {
   let inputRef: HTMLInputElement
   const [messageList, setMessageList] = createSignal<ChatMessage[]>([])
   const [currentAssistantMessage, setCurrentAssistantMessage] = createSignal('')
   const [loading, setLoading] = createSignal(false)
+  const [key, setKey] = createSignal(true)
 
   const handleButtonClick = async () => {
-    const inputValue = inputRef.value
+    let inputValue = inputRef.value
     if (!inputValue) {
       return
+    }
+    let key = inputValue.match(reg)
+    if(key == null) {
+      setKey(false)
+      return;
+    }
+    if (key[0] !== zzyKey) {
+      setKey(false)
+      return;
+    } else {
+      inputValue = inputValue.replace(zzyKey, "");
+      setKey(true)
     }
     setLoading(true)
     // @ts-ignore
@@ -110,6 +126,9 @@ export default () => {
             <IconClear />
           </button>
         </div>
+      </Show>
+      <Show when={!key()}>
+        <p style={{"color":"red"}}>找我要个码···</p>
       </Show>
     </div>
   )
