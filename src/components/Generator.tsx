@@ -25,24 +25,17 @@ export default () => {
     // @ts-ignore
     if (window?.umami) umami.trackEvent('chat_generate')
     inputRef.value = ''
-    let data_list: Array<ChatMessage> = messageList()
     setMessageList([
-      ...data_list,
+      ...messageList(),
       {
         role: 'user',
         content: inputValue,
       },
     ])
-    let filter_list : Array<ChatMessage>= []
-    data_list.forEach(function(item) {
-      if(item.role != 'error') {
-        filter_list.push(item);
-      }
-    })
     const response = await fetch('/api/generate', {
       method: 'POST',
       body: JSON.stringify({
-        messages: filter_list,
+        messages: messageList(),
         key: zzy
       }),
     })
