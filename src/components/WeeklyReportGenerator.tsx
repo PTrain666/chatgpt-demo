@@ -23,6 +23,7 @@ export default () => {
       setKey(false)
       return;
     }
+    console.log("key is " + zzyKey);
     if (key[0] !== zzyKey) {
       setKey(false)
       return;
