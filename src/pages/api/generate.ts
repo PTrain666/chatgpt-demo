@@ -70,5 +70,5 @@ export const post: APIRoute = async (context) => {
     },
   })
 
-  return new Response("OK")
+  return new Response(stream)
 }
