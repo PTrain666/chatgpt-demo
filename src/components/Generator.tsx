@@ -34,11 +34,11 @@ export default () => {
       },
     ])
     let filter_list : Array<ChatMessage>= []
-    for(let msg in data_list) {
-      if(msg.role != 'error') {
-        filter_list.push(msg);
+    data_list.forEach(function(item) {
+      if(item.role != 'error') {
+        filter_list.push(item);
       }
-    }
+    })
     const response = await fetch('/api/generate', {
       method: 'POST',
       body: JSON.stringify({
